@@ -53,35 +53,45 @@ const scrap = async (url) => {
   }
 };
 
-const main = async () => {
-  // ExcelJS
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Sheet Broo");
-  worksheet.columns = worksheetHeaders;
-
-  let start = 8001; // Start data
-  let targetCount = 1000;
-  let urlPart = "http://umkm.depkop.go.id/Detail?KoperasiId=";
-  let id = 147101001000000;
-  let umkms = [];
-  for (let count = 0; count < targetCount; count++) {
-    let umkm = await scrap(`${urlPart}${id + start + count}`);
-    umkms.push(umkm);
-
-    // Save to worksheet
-    worksheet.addRow(umkm);
-    console.log(`Processed ${count + 1} of ${targetCount}`);
-  }
-
+const save = async (workbook, path) => {
   // Save to file
-  console.log(`Saving to file`);
+  // console.log(`Saving to file`);
   try {
-    await workbook.xlsx.writeFile(
-      `./exports/umkm_${start}_to_${start + targetCount - 1}.xlsx`
-    );
+    await workbook.xlsx.writeFile(path);
   } catch (error) {
     console.log(error);
   }
 };
 
-main();
+const main = async (first, last) => {
+  // ExcelJS
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet Broo");
+  worksheet.columns = worksheetHeaders;
+
+  let startingPoint = 147101002003639;
+  let current = startingPoint;
+  let endingPoint = 147101003001200;
+  let urlPart = "http://umkm.depkop.go.id/Detail?KoperasiId=";
+  // let umkms = [];
+
+  let visitedCount = 0;
+  let okCount = 0;
+  while (current <= endingPoint) {
+    let url = `${urlPart}${current}`;
+    let umkm = await scrap(`${url}`);
+
+    if (umkm != null) {
+      worksheet.addRow(umkm);
+      save(workbook, `./exports/umkm_${first}_to_${last}.xlsx`);
+      okCount++;
+    }
+
+    // Save to worksheet
+    current++;
+    visitedCount++;
+    console.log(`Visited : ${visitedCount}\t Succeed : ${okCount}`);
+  }
+};
+
+main(8001, 9000);
