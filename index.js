@@ -1,5 +1,36 @@
 import axios from "axios";
 import { JSDOM } from "jsdom";
+import ExcelJS from "exceljs";
+
+const worksheetHeaders = [
+  { header: "Nama Usaha" },
+  { header: "Nomor Surat Izin" },
+  { header: "Tanggal Mulai Usaha" },
+  { header: "NPWP" },
+  { header: "Status Usaha" },
+  { header: "Alamat" },
+  { header: "Kelurahan/Desa" },
+  { header: "Kecamatan" },
+  { header: "Kabupaten/Kota" },
+  { header: "Provinsi" },
+  { header: "Kode Pos" },
+  { header: "Nomor Telpon" },
+  { header: "No Telpon Kantor" },
+  { header: "Faximili" },
+  { header: "Email" },
+  { header: "Website" },
+  { header: "Bentuk Usaha" },
+  { header: "Sektor Usaha" },
+  { header: "Skala Usaha" },
+  { header: "Tenaga Kerja Pria" },
+  { header: "Tenaga Kerja Wanita" },
+  { header: "Jumlah Tenaga Kerja" },
+  { header: "Karyawan Pria" },
+  { header: "Karyawan Wanita" },
+  { header: "Jumlah Karyawan" },
+  { header: "ID UMKM" },
+  { header: "Grade" },
+];
 
 const scrap = async (url) => {
   const umkm = [];
@@ -23,16 +54,34 @@ const scrap = async (url) => {
 };
 
 const main = async () => {
-  let target = 2;
+  // ExcelJS
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet Broo");
+  worksheet.columns = worksheetHeaders;
+
+  let start = 8001; // Start data
+  let targetCount = 1000;
   let urlPart = "http://umkm.depkop.go.id/Detail?KoperasiId=";
-  let startId = 147101001000001;
+  let id = 147101001000000;
   let umkms = [];
-  for (let count = 1; count <= target; count++) {
-    let umkm = await scrap(`${urlPart}${startId + count}`);
+  for (let count = 0; count < targetCount; count++) {
+    let umkm = await scrap(`${urlPart}${id + start + count}`);
     umkms.push(umkm);
+
+    // Save to worksheet
+    worksheet.addRow(umkm);
+    console.log(`Processed ${count + 1} of ${targetCount}`);
   }
-  console.log(umkms);
-  console.log(umkms.length);
+
+  // Save to file
+  console.log(`Saving to file`);
+  try {
+    await workbook.xlsx.writeFile(
+      `./exports/umkm_${start}_to_${start + targetCount - 1}.xlsx`
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 main();
