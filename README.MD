@@ -4,6 +4,12 @@
 
 ## How to
 
+- Clone this repo
+
+```
+git clone https://github.com/XMirz/scraping-umkm.git
+```
+
 - Run command to install dependencies
 
 ```
