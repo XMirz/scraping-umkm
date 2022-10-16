@@ -49,7 +49,7 @@ const scrap = async (url) => {
     return umkm;
   } catch (error) {
     console.log(error);
-    return [];
+    return null;
   }
 };
 
@@ -69,9 +69,11 @@ const main = async (first, last) => {
   const worksheet = workbook.addWorksheet("Sheet Broo");
   worksheet.columns = worksheetHeaders;
 
-  let startingPoint = 147101002003639;
+  // let startingPoint = 147101002003639; 8001
+  let startingPoint = 147101004001693;
   let current = startingPoint;
-  let endingPoint = 147101003001200;
+  let endingPoint = 147101004001872;
+  // let endingPoint = 147101003001380;
   let urlPart = "http://umkm.depkop.go.id/Detail?KoperasiId=";
   // let umkms = [];
 
@@ -81,17 +83,21 @@ const main = async (first, last) => {
     let url = `${urlPart}${current}`;
     let umkm = await scrap(`${url}`);
 
-    if (umkm != null) {
+    // Save to worksheet
+    if (umkm.length > 0) {
       worksheet.addRow(umkm);
       save(workbook, `./exports/umkm_${first}_to_${last}.xlsx`);
       okCount++;
+    } else if (umkm.length == 0) {
+      current = current - current.toString().substring(9, 15) + 1001001;
+      console.log("Incrementing about million");
     }
-
-    // Save to worksheet
-    current++;
     visitedCount++;
-    console.log(`Visited : ${visitedCount}\t Succeed : ${okCount}`);
+    console.log(
+      `Visited : ${visitedCount}\t Succeed : ${okCount}\t CurrentId : ${current}`
+    );
+    current++;
   }
 };
 
-main(8001, 9000);
+main(15001, 16000);
